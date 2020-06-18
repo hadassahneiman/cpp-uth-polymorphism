@@ -71,7 +71,7 @@ void PrePostFixer_CTOR_kcpkcp(PrePostFixer* const this, const char* prefix, cons
     this -> pre = prefix;
     this -> post = postfix;
 
-    printf("--- PrePostFixer CTOR: \"%s\"...\"%s\"\n", this -> pre, this -> post);
+    printf("--- PrePostFixer CTOR: \"%s\"...\"%s\"\n", prefix, postfix);
 }
 
 void PrePostFixer_DTOR(PrePostFixer* const this){
@@ -97,7 +97,7 @@ void PrePostFixer_print_lc(const PrePostFixer* const this, long num, char symbol
     }
     else {
         printf("%-60s | ", "[PrePostFixer::print_num(long)]");
-        printf("%s%ld%s\n", this -> pre, num,this ->  post);
+        printf("%s%ld%s\n", this -> pre, num, this ->  post);
     }
 }
 
@@ -116,7 +116,7 @@ void PrePostDollarFixer_CTOR_kcpkcp(PrePostDollarFixer* const this, const char* 
 
     this -> _vptr = PrePostDollarFixerVTable;
 
-    printf("--- PrePostDollarFixer CTOR: \"%s\"...\"%s\"\n", this -> prePostFixer.pre, this -> prePostFixer.post);
+    printf("--- PrePostDollarFixer CTOR: \"%s\"...\"%s\"\n", prefix, postfix);
 }
 
 void PrePostDollarFixer_CTOR_kPrePostDollarFixerp(PrePostDollarFixer* const this, const PrePostDollarFixer* other){
@@ -177,8 +177,7 @@ void PrePostHashFixer_CTOR_i(PrePostHashFixer* const this, int prc){
     printf("--- PrePostHashFixer CTOR: \"%s\"...\"%s\", precision: %d\n", "===> ", " <===", prc);
 
     printf("%-60s | ", "[PrePostHashFixer::print(double, char)]");
-    printf("%s[%c%.*f]%s\n", this -> prePostDollarFixer.prePostFixer.pre, '#', this -> precision,
-           9999.9999, this -> prePostDollarFixer.prePostFixer.post);
+    printf("%s[%c%.*f]%s\n", "===> ", '#', prc, 9999.9999, " <===");
 }
 
 void PrePostHashFixer_DTOR(PrePostHashFixer* const this){
