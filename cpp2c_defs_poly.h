@@ -17,19 +17,15 @@ typedef struct TextFormatter{
 
 }TextFormatter;
 
-funPtr TextFormatterVTable[2];
-
 void TextFormatter_DTOR(TextFormatter* const this);
 
 void TextFormatter_print_kcp(const TextFormatter* const this, const char* text);
 
 /***********DefaultTextFormatter************/
 
-funPtr DefaultTextFormatterVTable[2];
-
 typedef struct DefaultTextFormatter{
 
-    funPtr* _vptr;
+    TextFormatter textFormatter;
     /*const*/ int id;
 
 }DefaultTextFormatter;
@@ -56,11 +52,8 @@ DefaultTextFormatter* generateFormatterArray();
 
 /**************PrePostFixer*************/
 
-funPtr PrePostFixerVTable[4];
-
 typedef struct PrePostFixer{
 
-    funPtr* _vptr;
     DefaultTextFormatter defaultTextFormatter;
     const char* pre;
     const char* post;
@@ -79,11 +72,8 @@ char PrePostFixer_getDefaultSymbol(const PrePostFixer* const this);
 
 /*****************PrePostDollarFixer**********/
 
-funPtr PrePostDollarFixerVTable[4];
-
 typedef struct PrePostDollarFixer{
 
-    funPtr* _vptr;
     PrePostFixer prePostFixer;
 
 }PrePostDollarFixer;
@@ -104,11 +94,8 @@ char PrePostDollarFixer_getDefaultSymbol(const PrePostDollarFixer* const this);
 
 /************PrePostHashFixer************/
 
-funPtr PrePostHashFixerVTable[4];
-
 typedef struct PrePostHashFixer{
 
-    funPtr* _vptr;
     PrePostDollarFixer prePostDollarFixer;
     int precision;
 
@@ -123,5 +110,62 @@ void PrePostHashFixer_print_ic(const PrePostHashFixer* const this, int num, char
 void PrePostHashFixer_print_lc(const PrePostHashFixer* const this, long num, char symbol);
 
 char PrePostHashFixer_getDefaultSymbol(const PrePostHashFixer* const this);
+
+/************PrePostFloatDollarFixer************/
+
+typedef struct PrePostFloatDollarFixer{
+
+    PrePostDollarFixer prePostDollarFixer;
+
+}PrePostFloatDollarFixer;
+
+void PrePostFloatDollarFixer_CTOR_kcpkcp(PrePostFloatDollarFixer* const this, char* prefix, const char* postfix);
+
+void PrePostFloatDollarFixer_DTOR(PrePostFloatDollarFixer* const this);
+
+void PrePostFloatDollarFixer_print_f(const PrePostFloatDollarFixer* const this, float num);
+
+void PrePostFloatDollarFixer_print_fc(const PrePostFloatDollarFixer* const this, float num, char symbol);
+
+char PrePostFloatDollarFixer_getDefaultSymbol(const PrePostFloatDollarFixer* const this);
+
+/*********PrePostChecker************/
+
+typedef  struct PrePostChecker{
+
+    PrePostFloatDollarFixer prePostFloatDollarFixer;
+
+}PrePostChecker;
+
+void PrePostChecker_CTOR(PrePostChecker* const this);
+
+void PrePostChecker_DTOR(PrePostChecker* const this);
+
+void PrePostChecker_printThisSymbolUsingFunc(const PrePostChecker* const this);
+
+void PrePostChecker_printThisSymbolDirectly(const PrePostChecker* const this);
+
+void PrePostChecker_printDollarSymbolByCastUsingFunc(const PrePostChecker* const this);
+
+void PrePostChecker_printDollarSymbolByScopeUsingFunc(const PrePostChecker* const this);
+
+void PrePostChecker_printDollarSymbolByCastDirectly(const PrePostChecker* const this);
+
+void PrePostChecker_printDollarSymbolByScopeDirectly(const PrePostChecker* const this);
+
+/**************Multiplier***********/
+
+typedef struct Multiplier{
+
+    DefaultTextFormatter DefaultTextFormatter;
+    int times;
+
+}Multiplier;
+
+void Multiplier_CTOR_i(Multiplier* const this, int t);
+
+void Multiplier_Dtor(Multiplier* const this);
+
+void Multiplier_print_kcp(const Multiplier* const this, const char*);
 
 #endif /*CPP_UTH_POLYMORPHISM_HADASSAHNEIMAN_CPP2C_DEFS_POLY_H*/
