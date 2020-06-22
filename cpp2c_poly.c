@@ -2,7 +2,10 @@
 // Created by hn on 6/18/20.
 */
 
+#include <stdlib.h>
 #include "cpp2c_defs_poly.h"
+
+extern funPtr MultiplierVTable[2];
 
 void doPrePostFixer()
 {
@@ -10,15 +13,9 @@ void doPrePostFixer()
 
     printf("\n--- start doPrePostFixer() ---\n\n");
 
-    /*PrePostFixer angleBrackets("<<< ", " >>>");
-    angleBrackets.print("Hello World!");
-    angleBrackets.print(-777);
-    angleBrackets.print(350, '#');
-    angleBrackets.print(static_cast<long int>(3.14));*/
-
     PrePostFixer_CTOR_kcpkcp(&angleBrackets, "<<< ", " >>>");
     PrePostFixer_print_kcp(&angleBrackets, "Hello World!");
-    PrePostFixer_print_lc(&angleBrackets, (long int)-777, '\0');
+    PrePostFixer_print_lc(&angleBrackets, -777, '\0');
     PrePostFixer_print_lc(&angleBrackets, 350, '#');
     PrePostFixer_print_lc(&angleBrackets, (long int)3.14, '\0');
 
@@ -32,11 +29,6 @@ void doPrePostDollarFixer()
     PrePostDollarFixer asterisks;
 
     printf("\n--- start doPrePostDollarFixer() ---\n\n");
-
-    /*PrePostDollarFixer asterisks("***** ", " *****");
-    asterisks.print(-777);
-    asterisks.print(350, '#');
-    asterisks.print(3.14f);*/
 
     PrePostDollarFixer_CTOR_kcpkcp(&asterisks, "***** ", " *****");
     PrePostDollarFixer_print_ic(&asterisks, -777, '$');
@@ -124,8 +116,15 @@ void doMultiplier() {
     Multiplier m1, m2, m3, m4;
     printf("\n--- start doMultiplier() ---\n\n");
 
-    Multiplier_CTOR_i(&m1, 3);
-    Multiplier_CTOR_i(&m2, 5);
+    DefaultTextFormatter_CTOR((DefaultTextFormatter*)&m1);
+    m1.DefaultTextFormatter.textFormatter._vptr = MultiplierVTable;
+    m1.times = 3;
+    printf("--- Multiplier CTOR: times = %d\n", 3);
+
+    DefaultTextFormatter_CTOR((DefaultTextFormatter*)&m2);
+    m2.DefaultTextFormatter.textFormatter._vptr = MultiplierVTable;
+    m2.times = 5;
+    printf("--- Multiplier CTOR: times = %d\n", 5);
 
     DefaultTextFormatter_CTOR_kDefaultTextFormatter((DefaultTextFormatter*)&m3, (DefaultTextFormatter*)&m1);
     m3.DefaultTextFormatter.textFormatter._vptr = m1.DefaultTextFormatter.textFormatter._vptr;
@@ -162,7 +161,11 @@ void doFormatterArray(){
     DefaultTextFormatter_CTOR_kDefaultTextFormatter(&formatters[0], (DefaultTextFormatter*)&prePostDollarFixer);
     PrePostDollarFixer_DTOR(&prePostDollarFixer);
 
-    Multiplier_CTOR_i(&multiplier, 4);
+    DefaultTextFormatter_CTOR((DefaultTextFormatter*)&multiplier);
+    multiplier.DefaultTextFormatter.textFormatter._vptr = MultiplierVTable;
+    multiplier.times = 4;
+    printf("--- Multiplier CTOR: times = %d\n", 4);
+
     DefaultTextFormatter_CTOR_kDefaultTextFormatter(&formatters[1], (DefaultTextFormatter*)&multiplier);
     Multiplier_Dtor(&multiplier);
 
@@ -179,40 +182,56 @@ void doFormatterArray(){
         DefaultTextFormatter_DTOR(&formatters[i]);
     }
 }
-/*
+
 void doFormatterPtrs()
 {
+    DefaultTextFormatter* pfmt[3];
+    int i;
+
     printf("\n--- start doFormatterPtrs() ---\n\n");
 
-    DefaultTextFormatter* pfmt[] =
-    {
-        new PrePostDollarFixer("!!! ", " !!!"),
-        new Multiplier(4),
-        new PrePostChecker()
-    };
+    pfmt[0] = malloc(sizeof(PrePostDollarFixer));
+    PrePostDollarFixer_CTOR_kcpkcp((PrePostDollarFixer*)pfmt[0], "!!! ", " !!!");
 
-    for (int i = 0; i < 3; ++i)
-        pfmt[i]->print("Hello World!");
+    pfmt[1] = malloc(sizeof(Multiplier));
+    DefaultTextFormatter_CTOR((DefaultTextFormatter*)pfmt[1]);
+    ((Multiplier*)pfmt[1])->DefaultTextFormatter.textFormatter._vptr = MultiplierVTable;
+    ((Multiplier*)pfmt[1])->times = 4;
+    printf("--- Multiplier CTOR: times = %d\n", 4);
 
-    for (int i = 2; i >= 0; --i)
-        delete pfmt[i];
+    pfmt[2] = malloc(sizeof(PrePostChecker));
+    PrePostChecker_CTOR((PrePostChecker*)pfmt[2]);
+
+    for (i = 0; i < 3; ++i)
+        pfmt[i]->textFormatter._vptr[1](pfmt[i], "Hello World!");
+
+    for (i = 2; i >= 0; --i) {
+        pfmt[i]->textFormatter._vptr[0](pfmt[i]);
+        free(pfmt[i]);
+    }
 
     printf("\n--- end doFormatterPtrs() ---\n\n");
 }
 
 void doFormatterDynamicArray()
 {
-    printf("\n--- start doFormatterDynamicArray() ---\n\n");
-
-    DefaultTextFormatter* formatters = generateFormatterArray();
-
-    for (int i = 0; i < 3; ++i)
-        formatters[i].print("Hello World!");
-
-    delete[] formatters;
+    DefaultTextFormatter* formatters;
+    int i;
 
     printf("\n--- start doFormatterDynamicArray() ---\n\n");
-}*/
+
+    formatters = generateFormatterArray();
+
+    for (i = 0; i < 3; ++i)
+        formatters[i].textFormatter._vptr[1](&formatters[i], "Hello World!");
+
+    for (i = 2; i >= 0; --i)
+        formatters[i].textFormatter._vptr[0](&formatters[i]);
+
+    free(formatters);
+
+    printf("\n--- start doFormatterDynamicArray() ---\n\n");
+}
 
 int main()
 {
@@ -237,10 +256,12 @@ int main()
     doMultiplier();
 
     doFormatterArray();
-    /*doFormatterPtrs();
-    doFormatterDynamicArray();*/
+    doFormatterPtrs();
+    doFormatterDynamicArray();
 
     printf("\n--- End main() ---\n\n");
+
+    PrePostHashFixer_DTOR(&hfix);
 
     return 0;
 }

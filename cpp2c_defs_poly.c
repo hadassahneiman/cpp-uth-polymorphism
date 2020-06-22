@@ -7,7 +7,7 @@
 
 /************TextFormatter************/
 
-funPtr TextFormatterVTable[] = {(funPtr)TextFormatter_DTOR, (funPtr)TextFormatter_print_kcp};
+funPtr TextFormatterVTable[] = {TextFormatter_DTOR, TextFormatter_print_kcp};
 
 void TextFormatter_DTOR(TextFormatter* const this){}
 
@@ -15,7 +15,7 @@ void TextFormatter_print_kcp(const TextFormatter* const this, const char* text){
 
 /***********DefaultTextFormatter************/
 
-funPtr DefaultTextFormatterVTable[] = {(funPtr)DefaultTextFormatter_DTOR, (funPtr)DefaultTextFormatter_print_kcp};
+funPtr DefaultTextFormatterVTable[] = {DefaultTextFormatter_DTOR, DefaultTextFormatter_print_kcp};
 
 int next_id = 0;
 
@@ -55,12 +55,18 @@ void DefaultTextFormatter_print_kcp(const DefaultTextFormatter* const this, cons
 }
 
 DefaultTextFormatter* generateFormatterArray(){
-    return malloc(sizeof(DefaultTextFormatter)*3);
+    DefaultTextFormatter* formatter = malloc(sizeof(DefaultTextFormatter)*3);
+    int i;
+
+    for(i = 0; i < 3; ++i)
+        DefaultTextFormatter_CTOR(formatter + i);
+
+    return formatter;
 }
 
 /***********PrePostFixer************/
 
-funPtr PrePostFixerVTable[] = {(funPtr)PrePostFixer_DTOR, (funPtr)PrePostFixer_print_kcp,
+funPtr PrePostFixerVTable[] = {PrePostFixer_DTOR, PrePostFixer_print_kcp,
                                (funPtr) PrePostFixer_print_lc, (funPtr) PrePostFixer_getDefaultSymbol};
 
 void PrePostFixer_CTOR_kcpkcp(PrePostFixer* const this, const char* prefix, const char* postfix){
@@ -109,7 +115,7 @@ char PrePostFixer_getDefaultSymbol(const PrePostFixer* const this){
 
 /*************PrePostDollarFixer***********/
 
-funPtr PrePostDollarFixerVTable[] = {(funPtr)PrePostDollarFixer_DTOR, (funPtr)PrePostFixer_print_kcp,
+funPtr PrePostDollarFixerVTable[] = {PrePostDollarFixer_DTOR, PrePostFixer_print_kcp,
                                      (funPtr)PrePostDollarFixer_print_lc, (funPtr)PrePostDollarFixer_getDefaultSymbol};
 
 void PrePostDollarFixer_CTOR_kcpkcp(PrePostDollarFixer* const this, const char* prefix, const char* postfix){
@@ -168,7 +174,7 @@ char PrePostDollarFixer_getDefaultSymbol(const PrePostDollarFixer* const this){
 
 /************PrePostHashFixer**************/
 
-funPtr PrePostHashFixerVTable[] = {(funPtr)PrePostHashFixer_DTOR, (funPtr)PrePostFixer_print_kcp,
+funPtr PrePostHashFixerVTable[] = {PrePostHashFixer_DTOR, PrePostFixer_print_kcp,
                                    (funPtr)PrePostHashFixer_print_lc, (funPtr)PrePostHashFixer_getDefaultSymbol};
 
 void PrePostHashFixer_CTOR_i(PrePostHashFixer* const this, int prc){
@@ -220,7 +226,7 @@ char PrePostHashFixer_getDefaultSymbol(const PrePostHashFixer* const this){
 
 /***********PrePostFloatDollarFixer************/
 
-funPtr PrePostFloatDollarFixerVTable[] = {(funPtr)PrePostFloatDollarFixer_DTOR, (funPtr)PrePostFixer_print_kcp,
+funPtr PrePostFloatDollarFixerVTable[] = {PrePostFloatDollarFixer_DTOR, PrePostFixer_print_kcp,
                                           (funPtr)PrePostDollarFixer_print_lc, (funPtr)PrePostFloatDollarFixer_getDefaultSymbol};
 
 void PrePostFloatDollarFixer_CTOR_kcpkcp(PrePostFloatDollarFixer* const this, char* prefix, const char* postfix){
@@ -322,17 +328,7 @@ void PrePostChecker_printDollarSymbolByScopeDirectly(const PrePostChecker* const
 
 /********Multiplier***************/
 
-funPtr MultiplierVTable[] = {(funPtr)Multiplier_Dtor, (funPtr)Multiplier_print_kcp};
-
-void Multiplier_CTOR_i(Multiplier* const this, int t){
-
-    DefaultTextFormatter_CTOR((DefaultTextFormatter*)this);
-
-    this -> DefaultTextFormatter.textFormatter._vptr = MultiplierVTable;
-
-    this -> times = t;
-    printf("--- Multiplier CTOR: times = %d\n", t);
-}
+funPtr MultiplierVTable[] = {Multiplier_Dtor, Multiplier_print_kcp};
 
 void Multiplier_Dtor(Multiplier* const this){
     printf("--- Multiplier DTOR: times = %d\n", this->times);

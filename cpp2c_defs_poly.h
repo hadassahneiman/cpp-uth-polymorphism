@@ -162,8 +162,6 @@ typedef struct Multiplier{
 
 }Multiplier;
 
-void Multiplier_CTOR_i(Multiplier* const this, int t);
-
 void Multiplier_Dtor(Multiplier* const this);
 
 void Multiplier_print_kcp(const Multiplier* const this, const char*);
